@@ -1,0 +1,18 @@
+{
+	"compilerOptions": {
+		"noImplicitAny": true,
+		"suppressImplicitAnyIndexErrors": true,
+		"target": "es5",
+		"sourceMap": true,
+		"outDir": "../js/",
+		"jsx": "react"
+	},
+	"files": [
+		"SyncNode.ts",
+		"SyncNodeSocket.ts",
+		"Utils.ts",
+		"BaseViews.tsx",
+		"Models.ts",
+		"Views.tsx"
+		]
+}

@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"noImplicitAny": true,
+		"suppressImplicitAnyIndexErrors": true,
+		"module": "commonjs",
+		"outDir": "../dist/"
+	},
+	"files": [
+		"./Persistence.ts",
+		"./SyncNodeServer.ts"
+		]
+}
