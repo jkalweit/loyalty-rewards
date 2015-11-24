@@ -169,11 +169,21 @@ var Views;
         function TicketView(props) {
             _super.call(this, props, 'ticket');
         }
+        TicketView.prototype.addItem = function (name) {
+            var item = {
+                key: new Date().toISOString(),
+                name: name,
+                price: 1,
+                modifiers: {}
+            };
+            this.props.ticket.set(item.key, item);
+            this.refs['newItemBox'].clear();
+        };
         TicketView.prototype.render = function () {
             var items = Utils.toArray(this.props.ticket.items).map(function (item) {
                 return React.createElement(TicketItemView, {"item": item});
             });
-            return React.createElement("div", null, React.createElement("h2", null, "Ticket"), items, React.createElement(NewTicketItemView, {"autocompleted": function (name) { alert('name: ' + name); }}));
+            return React.createElement("div", null, React.createElement("h2", null, "Ticket"), items, React.createElement(NewTicketItemView, {"ref": "newItemBox", "autocompleted": this.addItem.bind(this)}));
         };
         return TicketView;
     })(BaseViews.SyncView);
@@ -212,12 +222,15 @@ var Views;
             });
             return filtered;
         };
+        NewTicketItemView.prototype.clear = function () {
+            this.setState({ text: '' });
+        };
         NewTicketItemView.prototype.render = function () {
             var _this = this;
             var options = this.state.autocompleteFiltered.map(function (option) {
                 return React.createElement("li", {"key": option}, option);
             });
-            return (React.createElement("div", {"className": "row"}, React.createElement("input", {"className": "col-xs-12", "value": this.state.text, "onChange": this.handleChangeAutocomplete.bind(this), "onFocus": function () { _this.setState({ editMode: true }); }, "onBlur": this.autocomplete.bind(this)}), this.state.editMode ?
+            return (React.createElement("div", {"className": "row"}, React.createElement("h1", null, "Hallo!"), React.createElement("input", {"className": "col-xs-12", "value": this.state.text, "onChange": this.handleChangeAutocomplete.bind(this), "onFocus": function () { _this.setState({ editMode: true }); }, "onBlur": this.autocomplete.bind(this)}), this.state.editMode ?
                 React.createElement("ul", {"className": "col-xs-12"}, options)
                 : null));
         };

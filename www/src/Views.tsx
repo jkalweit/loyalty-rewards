@@ -248,6 +248,16 @@ namespace Views {
 		constructor(props: TicketViewProps) {
 			super(props, 'ticket');
 		}
+		addItem(name: string) {
+			var item: Models.TicketItem = {
+				key: new Date().toISOString(),
+				name: name,
+				price: 1,
+				modifiers: {}	
+			};
+			this.props.ticket.set(item.key, item);
+			(this.refs['newItemBox'] as NewTicketItemView).clear();
+		}
 		render() {
 			var items = Utils.toArray(this.props.ticket.items).map((item: Models.TicketItem) => {
 				return <TicketItemView item={item} />
@@ -255,7 +265,7 @@ namespace Views {
 			return <div>
 					<h2>Ticket</h2>
 					{items}	
-					<NewTicketItemView autocompleted={(name: string) => { alert('name: ' + name);  }} />
+					<NewTicketItemView ref="newItemBox" autocompleted={this.addItem.bind(this)} />
 				</div>;
 		}
 	}
@@ -265,6 +275,7 @@ namespace Views {
 
 
 	export interface NewTicketItemViewProps {
+		ref: string;
 		autocompleted: (name: string) => void;
 	}
 	export interface NewTicketItemViewState extends BaseViews.SyncViewState {
@@ -305,13 +316,15 @@ namespace Views {
 			});
 			return filtered;
 		}
+		clear() {
+			this.setState({text: ''});
+		}
 		render() {
 			var options = this.state.autocompleteFiltered.map((option: string) => {
 				return <li key={option}>{option}</li>;
 			});
 			return (
-					<div className="row">
-						
+					<div className="row">	
 						<input className="col-xs-12" value={this.state.text} 
 							onChange={ this.handleChangeAutocomplete.bind(this) }
 							onFocus={ () => { this.setState({ editMode: true }); } } 
