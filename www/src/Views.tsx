@@ -15,41 +15,14 @@ namespace Views {
 		selected?: Models.LoyaltyMember;
 		filter?: string;
 		filtered?: Models.LoyaltyMember[];
+
+		selectedTicket?: Models.Ticket;
 	}
 	export class Main extends React.Component<{}, MainState> {
-		ticket: Models.Ticket = {
-			key: '0',
-			items: {
-			'0': {
-				key: '0',
-				name: 'Cheeseburger',
-				price: 10.75,
-				modifiers: {
-					'0': {
-						key: '0',
-						name: 'mw'
-					}
-				}
-			},
-			'1': {
-				key: '1',
-				name: 'Hamburger',
-				price: 9.00,
-				modifiers: {
-					'0': {
-						key: '0',
-						name: 'add pickles'
-					}
-				}
-			}
-			}
-
-		}
-
 		constructor(props: {}) {
 			super(props);
 
-			var data: Models.Db = { loyaltyMembers: {}, employees: {}, shifts: {} };
+			var data: Models.Db = { loyaltyMembers: {}, employees: {}, shifts: {}, tickets: {} };
 
 			document.addEventListener('deviceready', () => {
 				console.log('	deviceready 4');
@@ -59,11 +32,15 @@ namespace Views {
 					console.log('updated data!', updated);
 					var newState: MainState = { db: updated };
 					if(this.state.selected) newState.selected = updated.loyaltyMembers[this.state.selected.key];
+
+					var tickets = Utils.toArray(updated.tickets);
+					newState.selectedTicket = tickets.length > 0 ? tickets[0] : null;
+
 					this.setState(newState, () => { this.updateFiltered(); });
 				});
 
 			});
-			this.state = { db: data, selected: null, filter: '', filtered: [] };
+			this.state = { db: data, selected: null, filter: '', filtered: [], selectedTicket: null };
 		}
 		edit(item: Models.LoyaltyMember) {
 			this.setState({ selected: item });
@@ -106,9 +83,13 @@ namespace Views {
 				}
 			);
 
+			
+
 			return ( 
 					<div>
-						<TicketView ticket={this.ticket} />
+						{ this.state.selectedTicket ?
+						<TicketView ticket={this.state.selectedTicket} />
+						: null }
 						<h1>Loyalty Members</h1>
 						<input value={this.state.filter} onChange={this.updateFilter.bind(this)} onKeyUp={this.handleKeyUp.bind(this)} />
 						{members}
@@ -255,8 +236,10 @@ namespace Views {
 				price: 1,
 				modifiers: {}	
 			};
-			this.props.ticket.set(item.key, item);
-			(this.refs['newItemBox'] as NewTicketItemView).clear();
+			(this.props.ticket.items as SyncNode.ISyncNode).set(item.key, item);
+			var newItemBox = this.refs['newItemBox'] as NewTicketItemView;
+			newItemBox.clear();
+			newItemBox.focus();
 		}
 		render() {
 			var items = Utils.toArray(this.props.ticket.items).map((item: Models.TicketItem) => {
@@ -319,13 +302,16 @@ namespace Views {
 		clear() {
 			this.setState({text: ''});
 		}
+		focus() {
+			(React.findDOMNode(this.refs['name']) as HTMLInputElement).focus();
+		}
 		render() {
 			var options = this.state.autocompleteFiltered.map((option: string) => {
 				return <li key={option}>{option}</li>;
 			});
 			return (
 					<div className="row">	
-						<input className="col-xs-12" value={this.state.text} 
+						<input ref="name" className="col-xs-12" value={this.state.text} 
 							onChange={ this.handleChangeAutocomplete.bind(this) }
 							onFocus={ () => { this.setState({ editMode: true }); } } 
 							onBlur={ this.autocomplete.bind(this) } />	

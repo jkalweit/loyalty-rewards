@@ -17,34 +17,7 @@ var Views;
         function Main(props) {
             var _this = this;
             _super.call(this, props);
-            this.ticket = {
-                key: '0',
-                items: {
-                    '0': {
-                        key: '0',
-                        name: 'Cheeseburger',
-                        price: 10.75,
-                        modifiers: {
-                            '0': {
-                                key: '0',
-                                name: 'mw'
-                            }
-                        }
-                    },
-                    '1': {
-                        key: '1',
-                        name: 'Hamburger',
-                        price: 9.00,
-                        modifiers: {
-                            '0': {
-                                key: '0',
-                                name: 'add pickles'
-                            }
-                        }
-                    }
-                }
-            };
-            var data = { loyaltyMembers: {}, employees: {}, shifts: {} };
+            var data = { loyaltyMembers: {}, employees: {}, shifts: {}, tickets: {} };
             document.addEventListener('deviceready', function () {
                 console.log('	deviceready 4');
                 var sync = new SyncNodeSocket.SyncNodeSocket('data', data, 'http://localhost:1337');
@@ -54,10 +27,12 @@ var Views;
                     var newState = { db: updated };
                     if (_this.state.selected)
                         newState.selected = updated.loyaltyMembers[_this.state.selected.key];
+                    var tickets = Utils.toArray(updated.tickets);
+                    newState.selectedTicket = tickets.length > 0 ? tickets[0] : null;
                     _this.setState(newState, function () { _this.updateFiltered(); });
                 });
             });
-            this.state = { db: data, selected: null, filter: '', filtered: [] };
+            this.state = { db: data, selected: null, filter: '', filtered: [], selectedTicket: null };
         }
         Main.prototype.edit = function (item) {
             this.setState({ selected: item });
@@ -99,7 +74,9 @@ var Views;
                 }
                 return React.createElement("div", {"key": member.key, "className": classes, "onClick": function () { _this.setState({ selected: member }); }}, React.createElement("div", {"className": "col-sm-12"}, member.name));
             });
-            return (React.createElement("div", null, React.createElement(TicketView, {"ticket": this.ticket}), React.createElement("h1", null, "Loyalty Members"), React.createElement("input", {"value": this.state.filter, "onChange": this.updateFilter.bind(this), "onKeyUp": this.handleKeyUp.bind(this)}), members, this.state.selected ?
+            return (React.createElement("div", null, this.state.selectedTicket ?
+                React.createElement(TicketView, {"ticket": this.state.selectedTicket})
+                : null, React.createElement("h1", null, "Loyalty Members"), React.createElement("input", {"value": this.state.filter, "onChange": this.updateFilter.bind(this), "onKeyUp": this.handleKeyUp.bind(this)}), members, this.state.selected ?
                 React.createElement(LoyaltyMemberView, {"member": this.state.selected})
                 : null));
         };
@@ -176,8 +153,10 @@ var Views;
                 price: 1,
                 modifiers: {}
             };
-            this.props.ticket.set(item.key, item);
-            this.refs['newItemBox'].clear();
+            this.props.ticket.items.set(item.key, item);
+            var newItemBox = this.refs['newItemBox'];
+            newItemBox.clear();
+            newItemBox.focus();
         };
         TicketView.prototype.render = function () {
             var items = Utils.toArray(this.props.ticket.items).map(function (item) {
@@ -225,12 +204,15 @@ var Views;
         NewTicketItemView.prototype.clear = function () {
             this.setState({ text: '' });
         };
+        NewTicketItemView.prototype.focus = function () {
+            React.findDOMNode(this.refs['name']).focus();
+        };
         NewTicketItemView.prototype.render = function () {
             var _this = this;
             var options = this.state.autocompleteFiltered.map(function (option) {
                 return React.createElement("li", {"key": option}, option);
             });
-            return (React.createElement("div", {"className": "row"}, React.createElement("h1", null, "Hallo!"), React.createElement("input", {"className": "col-xs-12", "value": this.state.text, "onChange": this.handleChangeAutocomplete.bind(this), "onFocus": function () { _this.setState({ editMode: true }); }, "onBlur": this.autocomplete.bind(this)}), this.state.editMode ?
+            return (React.createElement("div", {"className": "row"}, React.createElement("input", {"ref": "name", "className": "col-xs-12", "value": this.state.text, "onChange": this.handleChangeAutocomplete.bind(this), "onFocus": function () { _this.setState({ editMode: true }); }, "onBlur": this.autocomplete.bind(this)}), this.state.editMode ?
                 React.createElement("ul", {"className": "col-xs-12"}, options)
                 : null));
         };

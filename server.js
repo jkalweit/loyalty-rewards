@@ -44,7 +44,38 @@ var defaultData = {
 		name: 'Matt Meares',
 		wage: 12
 	}
-    }
+    },
+    tickets: {
+	'0': 	{
+			key: '0',
+			items: {
+			'0': {
+				key: '0',
+				name: 'Cheeseburger',
+				price: 10.75,
+				modifiers: {
+					'0': {
+						key: '0',
+						name: 'mw'
+					}
+				}
+			},
+			'1': {
+				key: '1',
+				name: 'Hamburger',
+				price: 9.00,
+				modifiers: {
+					'0': {
+						key: '0',
+						name: 'add pickles'
+					}
+				}
+			}
+			}
+
+		}
+ 
+    } 
 };
 
 var syncServer = new Sync.SyncNodeServer('data', io, defaultData);

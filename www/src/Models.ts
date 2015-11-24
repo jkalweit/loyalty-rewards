@@ -10,6 +10,7 @@ namespace Models {
 		employees: {[key: string]: Employee};
 		//weeks: {[key: string]: Week};
 		shifts: {[key: string]: Shift};
+		tickets: {[key: string]: Ticket};
 	}
 	export interface LoyaltyMember extends SyncNode.ISyncNode {
 		key: string;
